@@ -6,6 +6,8 @@ import android.util.Log;
 import com.google.ar.core.Frame;
 import com.google.ar.core.Plane;
 import com.google.ar.core.examples.java.helloar.core.rendering.BackgroundRenderer;
+import com.google.ar.core.examples.java.helloar.core.rendering.CloudAttachment;
+import com.google.ar.core.examples.java.helloar.core.rendering.LineRenderer;
 import com.google.ar.core.examples.java.helloar.core.rendering.ObjectRenderer;
 import com.google.ar.core.examples.java.helloar.core.rendering.PlaneAttachment;
 import com.google.ar.core.examples.java.helloar.core.rendering.PlaneRenderer;

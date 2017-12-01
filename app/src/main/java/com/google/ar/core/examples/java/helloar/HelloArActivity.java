@@ -26,6 +26,8 @@ import android.widget.Toast;
 import com.google.ar.core.examples.java.helloar.core.BaseActivity;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import florent37.github.com.rxlifecycle.RxLifecycle;
 import io.reactivex.Observable;
 
@@ -43,6 +45,8 @@ public class HelloArActivity extends BaseActivity {
 
     private GestureDetector mGestureDetector;
 
+    private AtomicBoolean mCapturingLines = new AtomicBoolean(true);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +59,9 @@ public class HelloArActivity extends BaseActivity {
         mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
-                drawManager.addSingleTapEvent(e);
+                if(!mCapturingLines.get()) {
+                    drawManager.addSingleTapEvent(e);
+                }
                 return true;
             }
 
@@ -65,7 +71,15 @@ public class HelloArActivity extends BaseActivity {
             }
         });
 
-        mSurfaceView.setOnTouchListener((v, event) -> mGestureDetector.onTouchEvent(event));
+        mSurfaceView.setOnTouchListener((v, event) -> {
+            mGestureDetector.onTouchEvent(event);
+
+            if(mCapturingLines.get()) {
+                return drawManager.handleDrawingTouch(event); //for drawing
+            }
+
+            return true;
+        });
 
         // Set up renderer.
         mSurfaceView.setPreserveEGLContextOnPause(true);

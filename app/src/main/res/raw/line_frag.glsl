@@ -21,13 +21,13 @@ void main() {
 
 	if(drawMode > 0.0){
         if(depth <= nearCutOff){
-            c.gb *= map(depth, nearCutOff, nearCutOff * 0.95f, 0.0, 1.0);
+            c.gb *= map(depth, nearCutOff, nearCutOff * 0.95, 0.0, 1.0);
         }
         if(depth > nearCutOff && depth < farCutOff){
-             c.gb *= 0.0f;
+             c.gb *= 0.0;
         }
         if(depth >= farCutOff){
-            c.gb *= map(depth, farCutOff, farCutOff * 1.05f, 0.0, 1.0);
+            c.gb *= map(depth, farCutOff, farCutOff * 1.05, 0.0, 1.0);
         }
 	}
 
@@ -35,4 +35,4 @@ void main() {
     gl_FragColor = c;
 
 	gl_FragColor.a *= step(vCounters,visibility);
-}
+} 
