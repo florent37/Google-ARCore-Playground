@@ -23,11 +23,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
-import com.google.ar.core.examples.java.helloar.rendering.PlaneAttachment;
+import com.google.ar.core.examples.java.helloar.core.BaseActivity;
 import com.tbruyelle.rxpermissions2.RxPermissions;
-
-import java.util.ArrayList;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import florent37.github.com.rxlifecycle.RxLifecycle;
 import io.reactivex.Observable;

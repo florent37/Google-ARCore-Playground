@@ -15,7 +15,7 @@
 
 
 import com.google.ar.core.examples.java.helloar.R;
-import com.google.ar.core.examples.java.helloar.rendering.ShaderUtil;
+import com.google.ar.core.examples.java.helloar.core.rendering.ShaderUtil;
 
 import android.content.Context;
 import android.opengl.GLES20;

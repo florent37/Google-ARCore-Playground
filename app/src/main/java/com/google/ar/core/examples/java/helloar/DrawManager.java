@@ -11,7 +11,9 @@ import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.PlaneHitResult;
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.rendering.PlaneAttachment;
+import com.google.ar.core.examples.java.helloar.core.AbstractDrawManager;
+import com.google.ar.core.examples.java.helloar.core.DrawManagerRenderers;
+import com.google.ar.core.examples.java.helloar.core.rendering.PlaneAttachment;
 
 import java.util.Arrays;
 

@@ -1,12 +1,12 @@
-package com.google.ar.core.examples.java.helloar;
+package com.google.ar.core.examples.java.helloar.core;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
-import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
-import com.google.ar.core.examples.java.helloar.rendering.PlaneRenderer;
-import com.google.ar.core.examples.java.helloar.rendering.PointCloudRenderer;
+import com.google.ar.core.examples.java.helloar.core.rendering.BackgroundRenderer;
+import com.google.ar.core.examples.java.helloar.core.rendering.ObjectRenderer;
+import com.google.ar.core.examples.java.helloar.core.rendering.PlaneRenderer;
+import com.google.ar.core.examples.java.helloar.core.rendering.PointCloudRenderer;
 
 import java.io.IOException;
 

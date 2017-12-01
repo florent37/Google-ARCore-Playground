@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.ar.core.examples.java.helloar.rendering;
+package com.google.ar.core.examples.java.helloar.core.rendering;
 
 import com.google.ar.core.examples.java.helloar.R;
 

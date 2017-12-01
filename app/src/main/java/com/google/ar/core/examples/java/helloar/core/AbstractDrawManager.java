@@ -1,11 +1,11 @@
-package com.google.ar.core.examples.java.helloar;
+package com.google.ar.core.examples.java.helloar.core;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.rendering.PlaneAttachment;
+import com.google.ar.core.examples.java.helloar.core.rendering.PlaneAttachment;
 
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
