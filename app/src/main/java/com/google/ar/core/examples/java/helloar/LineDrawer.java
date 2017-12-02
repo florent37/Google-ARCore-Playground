@@ -39,7 +39,7 @@ import javax.vecmath.Vector3f;
  * the ARCore API.
  */
 
-public class LineDrawer {
+public class LineDrawer implements Drawer {
     private static final String TAG = "LineDrawer";
 
     private final Session mArCoreSession;
@@ -82,7 +82,8 @@ public class LineDrawer {
         Matrix.setIdentityM(mZeroMatrix, 0);
     }
 
-    public void prepareLine(){
+    @Override
+    public void prepare(Context context) {
         mLineShaderRenderer.createOnGlThread(mContext);
     }
 
@@ -219,7 +220,7 @@ public class LineDrawer {
         }
     }
 
-    public void onDraw(final Frame arCoreFrame, final float[] cameramtx, final float[] projmtx){
+    public void onDraw(final Frame arCoreFrame, final float[] cameramtx, final float[] projmtx, float lightIntensity){
         update(arCoreFrame, cameramtx, projmtx);
         if (arCoreFrame.getTrackingState() == Frame.TrackingState.TRACKING) {
             mLineShaderRenderer.draw(cameramtx, projmtx, mScreenSizeManager.getWidth(), mScreenSizeManager.getHeight(), AppSettings.getNearClip(), AppSettings.getFarClip());

@@ -25,9 +25,6 @@ public class AbstractDrawManager {
     // Tap handling and UI.
     protected final ArrayBlockingQueue<MotionEvent> mQueuedSingleTaps = new ArrayBlockingQueue<>(16);
 
-    protected final ArrayList<PlaneAttachment> mClickedPlanePositions = new ArrayList<>();
-    protected final ArrayList<CloudAttachment> mClickedCloudPositions = new ArrayList<>();
-
     public AbstractDrawManager(Context mContext, Session mArcoreSession) {
         this.mContext = mContext;
         this.mArcoreSession = mArcoreSession;

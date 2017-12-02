@@ -17,12 +17,16 @@
 package com.google.ar.core.examples.java.helloar;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
 
+import com.google.ar.core.examples.java.helloar.core.AbstractDrawManager;
 import com.google.ar.core.examples.java.helloar.core.BaseActivity;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
@@ -38,14 +42,12 @@ import io.reactivex.Observable;
  */
 public class HelloArActivity extends BaseActivity {
 
-    private DrawManager drawManager;
+    DrawManager drawManager;
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView mSurfaceView;
 
-    private GestureDetector mGestureDetector;
-
-    private AtomicBoolean mCapturingLines = new AtomicBoolean(true);
+    AtomicBoolean mCapturingLines = new AtomicBoolean(false);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,32 +56,30 @@ public class HelloArActivity extends BaseActivity {
         mSurfaceView = (GLSurfaceView) findViewById(R.id.surfaceview);
 
         drawManager = new DrawManager(this, mArcoreSession);
-
-        // Set up tap listener.
-        mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+        drawManager.setListener(new AbstractDrawManager.Listener() {
             @Override
-            public boolean onSingleTapUp(MotionEvent e) {
+            public void hideLoading() {
+                HelloArActivity.this.hideLoadingMessage();
+            }
+        });
+
+        mSurfaceView.setOnTouchListener(new SurfaceTouchListener(this, new SurfaceTouchListener.Listener() {
+            @Override
+            public boolean onSingleTap(MotionEvent event) {
                 if(!mCapturingLines.get()) {
-                    drawManager.addSingleTapEvent(e);
+                    drawManager.addSingleTapEvent(event);
                 }
                 return true;
             }
 
             @Override
-            public boolean onDown(MotionEvent e) {
+            public boolean onTouchEvent(MotionEvent event) {
+                if(mCapturingLines.get()) {
+                    return drawManager.handleDrawingTouch(event); //for drawing
+                }
                 return true;
             }
-        });
-
-        mSurfaceView.setOnTouchListener((v, event) -> {
-            mGestureDetector.onTouchEvent(event);
-
-            if(mCapturingLines.get()) {
-                return drawManager.handleDrawingTouch(event); //for drawing
-            }
-
-            return true;
-        });
+        }));
 
         // Set up renderer.
         mSurfaceView.setPreserveEGLContextOnPause(true);
@@ -119,9 +119,5 @@ public class HelloArActivity extends BaseActivity {
                     mSurfaceView.onPause();
                     mArcoreSession.pause();
                 });
-
-        drawManager.setListener(() -> {
-            HelloArActivity.super.hideLoadingMessage();
-        });
     }
 }

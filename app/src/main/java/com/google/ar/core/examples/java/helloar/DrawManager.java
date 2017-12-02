@@ -25,21 +25,18 @@ import javax.microedition.khronos.opengles.GL10;
 public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Renderer {
     static final int MAX_OBJECTS_ON_SCREEN = 16;
 
-    // Temporary matrix allocated here to reduce number of allocations for each frame.
-
-    private final float[] mAnchorMatrix = new float[16];
-
     //the objects opengl will draw
+    private final BackgroundDrawer mBackgroundDrawer;
     private final ObjectsToDraw mObjectsToDraw;
     private final LineDrawer mlineDrawer;
 
     private final SizeManager sizeManager = new SizeManager();
-    private boolean capturingLines;
 
     public DrawManager(Context context, Session arCoreSession) {
         super(context, arCoreSession);
-        mObjectsToDraw = new ObjectsToDraw(context);
+        mObjectsToDraw = new ObjectsToDraw(arCoreSession);
         mlineDrawer = new LineDrawer(context, arCoreSession, sizeManager);
+        mBackgroundDrawer = new BackgroundDrawer(arCoreSession);
     }
 
     @Override
@@ -47,14 +44,9 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
         // Create the texture and pass it to ARCore session to be filled during update().
-        mObjectsToDraw.prepareBackground();
-        mArcoreSession.setCameraTextureName(mObjectsToDraw.background.getTextureId());
-
-        mObjectsToDraw.prepareAndroidObject();
-        mObjectsToDraw.preparePlane();
-        mObjectsToDraw.preparePoints();
-
-        mlineDrawer.prepareLine();
+        mBackgroundDrawer.prepare(mContext);
+        mObjectsToDraw.prepare(mContext);
+        mlineDrawer.prepare(mContext);
     }
 
     @Override
@@ -89,14 +81,14 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
             // Obtain the current arcoreFrame from ARSession. When the configuration is set to
             // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
             // camera framerate.
-            Frame arcoreFrame = mArcoreSession.update();
+            final Frame arcoreFrame = mArcoreSession.update();
 
             // Handle taps. Handling only one tap per arcoreFrame, as taps are usually low frequency
             // compared to arcoreFrame rate.
             handleTaps(arcoreFrame);
 
             // Draw background.
-            mObjectsToDraw.background.draw(arcoreFrame);
+            mBackgroundDrawer.onDraw(arcoreFrame, null, null, 0);
 
             // If not tracking, don't draw 3d objects.
             if (arcoreFrame.getTrackingState() == Frame.TrackingState.NOT_TRACKING) {
@@ -114,17 +106,9 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
             // Compute lighting from average intensity of the image.
             final float lightIntensity = arcoreFrame.getLightEstimate().getPixelIntensity();
 
-            /*
-            // Visualize tracked points.
-            mObjectsToDraw.drawPoints(arcoreFrame, cameraMatrix, projMatrix);
+            mObjectsToDraw.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
 
-            // Visualize planes.
-            mObjectsToDraw.drawPlanes(mArcoreSession.getAllPlanes(), arcoreFrame, projMatrix);
-
-            //We will draw bugdroids on each clicked positions
-            mObjectsToDraw.drawBugDroids(mClickedPlanePositions, mAnchorMatrix, cameraMatrix, projMatrix, lightIntensity);
-*/
-            mlineDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix);
+            mlineDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
 
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
@@ -132,7 +116,6 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
         }
 
     }
-
 
     private void handleTaps(Frame frame) throws NotTrackingException {
         // Handle taps. Handling only one tap per frame, as taps are usually low frequency
@@ -144,25 +127,26 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
                 if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
                     // Cap the number of objects created. This avoids overloading both the
                     // rendering system and ARCore.
-                    if (mClickedPlanePositions.size() >= MAX_OBJECTS_ON_SCREEN) {
-                        mArcoreSession.removeAnchors(Arrays.asList(mClickedPlanePositions.get(0).getAnchor()));
-                        mClickedPlanePositions.remove(0);
+                    if (mObjectsToDraw.mClickedPlanePositions.size() >= MAX_OBJECTS_ON_SCREEN) {
+                        mArcoreSession.removeAnchors(Arrays.asList(mObjectsToDraw.mClickedPlanePositions.get(0).getAnchor()));
+                        mObjectsToDraw.mClickedPlanePositions.remove(0);
                     }
                     // Adding an Anchor tells ARCore that it should track this position in
                     // space. This anchor will be used in PlaneAttachment to place the 3d model
                     // in the correct position relative both to the world and to the plane.
-                    mClickedPlanePositions.add(new PlaneAttachment(
+                    mObjectsToDraw.mClickedPlanePositions.add(new PlaneAttachment(
                             ((PlaneHitResult) hit).getPlane(),
                             mArcoreSession.addAnchor(hit.getHitPose())));
 
                     // Hits are sorted by depth. Consider only closest hit on a plane.
                     break;
-                } else if(hit instanceof PointCloudHitResult){
+                }
+                /*else if(hit instanceof PointCloudHitResult){
                     mClickedCloudPositions.add(new CloudAttachment(
                             ((PointCloudHitResult) hit).getPointCloudPose(),
                             ((PointCloudHitResult) hit).getPointCloud(),
                             mArcoreSession.addAnchor(hit.getHitPose())));
-                }
+                }*/
             }
         }
     }
