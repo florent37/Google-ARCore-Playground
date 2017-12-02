@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar;
+package com.google.ar.core.examples.java.helloar.arcoremanager;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

@@ -10,11 +10,15 @@ import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.PlaneHitResult;
-import com.google.ar.core.PointCloudHitResult;
 import com.google.ar.core.Session;
+import com.google.ar.core.examples.java.helloar.arcoremanager.ArCoreManager;
+import com.google.ar.core.examples.java.helloar.arcoremanager.SizeManager;
 import com.google.ar.core.examples.java.helloar.core.AbstractDrawManager;
-import com.google.ar.core.examples.java.helloar.core.rendering.CloudAttachment;
 import com.google.ar.core.examples.java.helloar.core.rendering.PlaneAttachment;
+import com.google.ar.core.examples.java.helloar.drawer.BackgroundDrawer;
+import com.google.ar.core.examples.java.helloar.drawer.BugDroidDrawer;
+import com.google.ar.core.examples.java.helloar.drawer.LineDrawer;
+import com.google.ar.core.examples.java.helloar.drawer.PointCloudDrawer;
 import com.google.ar.core.exceptions.NotTrackingException;
 
 import java.util.Arrays;
@@ -27,25 +31,36 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
 
     //the objects opengl will draw
     private final BackgroundDrawer mBackgroundDrawer;
-    private final ObjectsToDraw mObjectsToDraw;
+
+    private final BugDroidDrawer mBugDroidDrawer;
+    private final PointCloudDrawer mPointCloudDrawer;
     private final LineDrawer mlineDrawer;
+
+    private final ArCoreManager.Settings mSettings;
 
     private final SizeManager sizeManager = new SizeManager();
 
-    public DrawManager(Context context, Session arCoreSession) {
+    public DrawManager(Context context, Session arCoreSession, ArCoreManager.Settings settings) {
         super(context, arCoreSession);
-        mObjectsToDraw = new ObjectsToDraw(arCoreSession);
-        mlineDrawer = new LineDrawer(context, arCoreSession, sizeManager);
+        mSettings = settings;
         mBackgroundDrawer = new BackgroundDrawer(arCoreSession);
+
+        mBugDroidDrawer = new BugDroidDrawer();
+
+        mPointCloudDrawer = new PointCloudDrawer();
+
+        mlineDrawer = new LineDrawer(context, arCoreSession, sizeManager);
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-
         // Create the texture and pass it to ARCore session to be filled during update().
+
         mBackgroundDrawer.prepare(mContext);
-        mObjectsToDraw.prepare(mContext);
+
+        mPointCloudDrawer.prepare(mContext);
+        mBugDroidDrawer.prepare(mContext);
         mlineDrawer.prepare(mContext);
     }
 
@@ -87,8 +102,11 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
             // compared to arcoreFrame rate.
             handleTaps(arcoreFrame);
 
-            // Draw background.
-            mBackgroundDrawer.onDraw(arcoreFrame, null, null, 0);
+
+            if(mSettings.drawBackground.get()){
+                // Draw background.
+                mBackgroundDrawer.onDraw(arcoreFrame, null, null, 0);
+            }
 
             // If not tracking, don't draw 3d objects.
             if (arcoreFrame.getTrackingState() == Frame.TrackingState.NOT_TRACKING) {
@@ -96,20 +114,23 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
             }
 
             // Get projection matrix.
-            float[] projMatrix = new float[16];
+            final float[] projMatrix = new float[16];
             mArcoreSession.getProjectionMatrix(projMatrix, 0, AppSettings.getNearClip(), AppSettings.getFarClip());
 
             // Get camera matrix and draw.
-            float[] cameraMatrix = new float[16];
+            final float[] cameraMatrix = new float[16];
             arcoreFrame.getViewMatrix(cameraMatrix, 0);
 
             // Compute lighting from average intensity of the image.
             final float lightIntensity = arcoreFrame.getLightEstimate().getPixelIntensity();
 
-            mObjectsToDraw.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
+            //draw
+            if(mSettings.drawPoints.get()) {
+                mPointCloudDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
+            }
 
+            mBugDroidDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
             mlineDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
-
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
@@ -127,14 +148,14 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
                 if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
                     // Cap the number of objects created. This avoids overloading both the
                     // rendering system and ARCore.
-                    if (mObjectsToDraw.mClickedPlanePositions.size() >= MAX_OBJECTS_ON_SCREEN) {
-                        mArcoreSession.removeAnchors(Arrays.asList(mObjectsToDraw.mClickedPlanePositions.get(0).getAnchor()));
-                        mObjectsToDraw.mClickedPlanePositions.remove(0);
+                    if (mBugDroidDrawer.mClickedPlanePositions.size() >= MAX_OBJECTS_ON_SCREEN) {
+                        mArcoreSession.removeAnchors(Arrays.asList(mBugDroidDrawer.mClickedPlanePositions.get(0).getAnchor()));
+                        mBugDroidDrawer.mClickedPlanePositions.remove(0);
                     }
                     // Adding an Anchor tells ARCore that it should track this position in
                     // space. This anchor will be used in PlaneAttachment to place the 3d model
                     // in the correct position relative both to the world and to the plane.
-                    mObjectsToDraw.mClickedPlanePositions.add(new PlaneAttachment(
+                    mBugDroidDrawer.mClickedPlanePositions.add(new PlaneAttachment(
                             ((PlaneHitResult) hit).getPlane(),
                             mArcoreSession.addAnchor(hit.getHitPose())));
 

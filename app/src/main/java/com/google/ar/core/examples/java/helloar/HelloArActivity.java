@@ -16,38 +16,27 @@
 
 package com.google.ar.core.examples.java.helloar;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.google.ar.core.examples.java.helloar.core.AbstractDrawManager;
-import com.google.ar.core.examples.java.helloar.core.BaseActivity;
-import com.tbruyelle.rxpermissions2.RxPermissions;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import florent37.github.com.rxlifecycle.RxLifecycle;
-import io.reactivex.Observable;
+import com.google.ar.core.examples.java.helloar.arcoremanager.ArCoreManager;
 
 /**
  * This is a simple example that shows how to create an augmented reality (AR) application using
  * the ARCore API. The application will display any detected planes and will allow the user to
  * tap on a plane to place a 3d model of the Android robot.
  */
-public class HelloArActivity extends BaseActivity {
+public class HelloArActivity extends AppCompatActivity {
 
-    DrawManager drawManager;
-
+    protected Snackbar mLoadingMessageSnackbar = null;
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView mSurfaceView;
-
-    AtomicBoolean mCapturingLines = new AtomicBoolean(false);
+    private ArCoreManager arCoreManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,69 +44,58 @@ public class HelloArActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         mSurfaceView = (GLSurfaceView) findViewById(R.id.surfaceview);
 
-        drawManager = new DrawManager(this, mArcoreSession);
-        drawManager.setListener(new AbstractDrawManager.Listener() {
+        arCoreManager = new ArCoreManager(this, new ArCoreManager.Listener() {
             @Override
-            public void hideLoading() {
-                HelloArActivity.this.hideLoadingMessage();
+            public void onArCoreUnsuported() {
+                Toast.makeText(HelloArActivity.this, "This device does not support AR", Toast.LENGTH_LONG).show();
+                finish();
+            }
+
+            @Override
+            public void onPermissionNotAllowed() {
+                //on permission not allowed
+                Toast.makeText(HelloArActivity.this,
+                        "Camera permission is needed to run this application", Toast.LENGTH_LONG).show();
+                finish();
+            }
+
+            @Override
+            public void showLoadingMessage() {
+                runOnUiThread(() -> {
+                    mLoadingMessageSnackbar = Snackbar.make(
+                            findViewById(android.R.id.content),
+                            "Searching for surfaces...", Snackbar.LENGTH_INDEFINITE);
+                    mLoadingMessageSnackbar.getView().setBackgroundColor(0xbf323232);
+                    mLoadingMessageSnackbar.show();
+                });
+            }
+
+            @Override
+            public void hideLoadingMessage() {
+                runOnUiThread(() -> {
+                    if (mLoadingMessageSnackbar != null) {
+                        mLoadingMessageSnackbar.dismiss();
+                        mLoadingMessageSnackbar = null;
+                    }
+                });
             }
         });
+        arCoreManager.setup(mSurfaceView);
+    }
 
-        mSurfaceView.setOnTouchListener(new SurfaceTouchListener(this, new SurfaceTouchListener.Listener() {
-            @Override
-            public boolean onSingleTap(MotionEvent event) {
-                if(!mCapturingLines.get()) {
-                    drawManager.addSingleTapEvent(event);
-                }
-                return true;
-            }
-
-            @Override
-            public boolean onTouchEvent(MotionEvent event) {
-                if(mCapturingLines.get()) {
-                    return drawManager.handleDrawingTouch(event); //for drawing
-                }
-                return true;
-            }
-        }));
-
-        // Set up renderer.
-        mSurfaceView.setPreserveEGLContextOnPause(true);
-        mSurfaceView.setEGLContextClientVersion(2);
-        mSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Alpha used for plane blending.
-        mSurfaceView.setRenderer(drawManager);
-        mSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-
-        // ARCore requires camera permissions to operate. If we did not yet obtain runtime
-        // permission on Android M and above, now is a good time to ask the user for it.
-        RxLifecycle.with(this)
-                .onResume()
-                .flatMap($ -> new RxPermissions(this).request(Manifest.permission.CAMERA))
-                .flatMap(success -> {
-                    if (!success) return Observable.error(new Throwable());
-                    else return Observable.just(success);
-                })
-                .subscribe(event -> {
-                    showLoadingMessage();
-                    // Note that order matters - see the note in onPause(), the reverse applies here.
-                    mArcoreSession.resume(mDefaultConfig);
-
-                    mSurfaceView.onResume();
-                }, throwable -> {
-                    //on permission not allowed
-                    Toast.makeText(this,
-                            "Camera permission is needed to run this application", Toast.LENGTH_LONG).show();
-                    finish();
-                });
-
-        RxLifecycle.with(this)
-                .onPause()
-                .subscribe(event -> {
-                    // Note that the order matters - GLSurfaceView is paused first so that it does not try
-                    // to query the session. If Session is paused before GLSurfaceView, GLSurfaceView may
-                    // still call mSession.update() and get a SessionPausedException.
-                    mSurfaceView.onPause();
-                    mArcoreSession.pause();
-                });
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            // Standard Android full-screen functionality.
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 }
