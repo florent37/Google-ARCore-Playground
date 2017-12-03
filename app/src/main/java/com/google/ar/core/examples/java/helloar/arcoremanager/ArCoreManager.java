@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.helloar.arcoremanager;
 
 import android.Manifest;
+import android.graphics.Color;
 import android.opengl.GLSurfaceView;
 import android.support.annotation.NonNull;
 import android.support.v4.view.GestureDetectorCompat;
@@ -11,10 +12,12 @@ import android.view.View;
 
 import com.google.ar.core.Config;
 import com.google.ar.core.Session;
+import com.google.ar.core.examples.java.helloar.SettingsView;
 import com.google.ar.core.examples.java.helloar.core.AbstractDrawManager;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import florent37.github.com.rxlifecycle.RxLifecycle;
 import io.reactivex.Observable;
@@ -128,6 +131,26 @@ public class ArCoreManager {
         mSettings.captureLines.set(captureLines);
     }
 
+    public void setDrawBackground(boolean active) {
+        mSettings.drawBackground.set(active);
+    }
+
+    public void setDrawDots(boolean active) {
+        mSettings.drawPoints.set(active);
+    }
+
+    public void setDrawPlanes(boolean active) {
+        mSettings.drawPlanes.set(active);
+    }
+
+    public void setLinesColor(int color) {
+        mSettings.linesColor.set(color);
+    }
+
+    public Settings getSettings() {
+        return mSettings;
+    }
+
     public interface Listener {
         void onArCoreUnsuported();
 
@@ -143,5 +166,6 @@ public class ArCoreManager {
         public final AtomicBoolean drawPoints = new AtomicBoolean(true);
         public final AtomicBoolean captureLines = new AtomicBoolean(false);
         public final AtomicBoolean drawPlanes = new AtomicBoolean(true);;
+        public final AtomicInteger linesColor = new AtomicInteger(Color.WHITE);
     }
 }

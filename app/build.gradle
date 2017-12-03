@@ -40,7 +40,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:design:26.1.0'
 
-    compile 'com.androidadvance:topsnackbar:1.1.1'
+    compile 'com.github.QuadFlask:colorpicker:0.0.13'
 
     compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
     compile 'com.github.florent37:rxlifecycle:2.0.4'

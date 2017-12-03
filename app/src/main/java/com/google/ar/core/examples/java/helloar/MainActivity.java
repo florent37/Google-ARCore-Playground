@@ -19,7 +19,7 @@ package com.google.ar.core.examples.java.helloar;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
@@ -94,8 +94,9 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
                     switch (item.getItemId()) {
                         case R.id.settings:
+                            openSettings();
                             //Action quand onglet 1 sélectionné
-                            return true;
+                            return false;
                         case R.id.onTap_addAndroidObject:
                             arCoreManager.setCaptureLines(false);
                             return true;
@@ -108,6 +109,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void openSettings() {
+        new AlertDialog.Builder(this)
+                .setView(new SettingsView(this, arCoreManager.getSettings()))
+                .create()
+                .show();
     }
 
     @Override
