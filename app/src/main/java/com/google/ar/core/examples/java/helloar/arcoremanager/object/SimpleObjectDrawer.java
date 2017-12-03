@@ -1,26 +1,24 @@
-package com.google.ar.core.examples.java.helloar.bugdroid;
+package com.google.ar.core.examples.java.helloar.arcoremanager.object;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.ar.core.Frame;
+import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.Drawer;
 import com.google.ar.core.examples.java.helloar.core.rendering.ObjectRenderer;
 import com.google.ar.core.examples.java.helloar.core.rendering.PlaneAttachment;
-import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.Drawer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-//We will draw bugdroids on each clicked positions
-public class BugDroidDrawer implements Drawer {
+//We will draw an object on each clicked positions
+public class SimpleObjectDrawer implements Drawer {
 
     private final static String TAG = "SimpleObjectDrawer";
 
     //the droid
     private final ObjectRenderer androidObject = new ObjectRenderer();
-    private final ObjectRenderer androidObjectShadow = new ObjectRenderer();
 
     // Temporary matrix allocated here to reduce number of allocations for each frame.
     private final float[] mAnchorMatrix = new float[16];
@@ -28,20 +26,20 @@ public class BugDroidDrawer implements Drawer {
     @Nullable
     private List<PlaneAttachment> positions;
 
-    public BugDroidDrawer() {
+    private final String objFile;
+    private final String objTextureAsset;
+
+    public SimpleObjectDrawer(String objFile, String objTextureAsset) {
+        this.objFile = objFile;
+        this.objTextureAsset = objTextureAsset;
     }
 
     @Override
     public void prepare(Context context) {
         // Prepare the other rendering objects.
         try {
-            androidObject.createOnGlThread(/*context=*/context, "andy.obj", "andy.png");
+            androidObject.createOnGlThread(/*context=*/context, objFile, objTextureAsset);
             androidObject.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
-
-            androidObjectShadow.createOnGlThread(/*context=*/context,
-                    "andy_shadow.obj", "andy_shadow.png");
-            androidObjectShadow.setBlendMode(ObjectRenderer.BlendMode.Shadow);
-            androidObjectShadow.setMaterialProperties(1.0f, 0.0f, 0.0f, 1.0f);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read obj file");
         }
@@ -70,9 +68,7 @@ public class BugDroidDrawer implements Drawer {
 
                 // Update and draw the model and its shadow.
                 androidObject.updateModelMatrix(mAnchorMatrix, scaleFactor);
-                androidObjectShadow.updateModelMatrix(mAnchorMatrix, scaleFactor);
                 androidObject.draw(cameraMatrix, projMatrix, lightIntensity);
-                androidObjectShadow.draw(cameraMatrix, projMatrix, lightIntensity);
             }
         }
 

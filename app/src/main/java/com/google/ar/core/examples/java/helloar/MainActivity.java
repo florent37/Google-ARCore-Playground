@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.ar.core.examples.java.helloar.arcoremanager.ArCoreManager;
+import com.google.ar.core.examples.java.helloar.arcoremanager.object.SimpleArCoreObject;
 import com.google.ar.core.examples.java.helloar.bugdroid.BugDroidArCoreObject;
 
 import butterknife.BindView;
@@ -89,7 +90,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         arCoreManager.setup(mSurfaceView);
-        arCoreManager.addObjectToDraw(new BugDroidArCoreObject());
+
+        //arCoreManager.addObjectToDraw(new BugDroidArCoreObject());
+        arCoreManager.addObjectToDraw(new SimpleArCoreObject("meuble.obj", "meuble.png"));
 
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
                     switch (item.getItemId()) {
