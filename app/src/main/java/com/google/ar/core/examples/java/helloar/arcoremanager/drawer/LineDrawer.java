@@ -17,12 +17,14 @@
 package com.google.ar.core.examples.java.helloar.arcoremanager.drawer;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.opengl.Matrix;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
+import com.google.ar.core.examples.java.helloar.arcoremanager.ArCoreManager;
 import com.google.ar.core.examples.java.helloar.core.AppSettings;
 import com.google.ar.core.examples.java.helloar.arcoremanager.SizeManager;
 import com.google.ar.core.examples.java.helloar.core.rendering.BiquadFilter;
@@ -31,6 +33,7 @@ import com.google.ar.core.examples.java.helloar.core.rendering.LineUtils;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
@@ -71,6 +74,8 @@ public class LineDrawer implements Drawer {
     public AtomicBoolean bLineParameters = new AtomicBoolean(false);
     public AtomicBoolean bUndo = new AtomicBoolean(false);
     public AtomicBoolean bNewStroke = new AtomicBoolean(false);
+
+    public AtomicInteger color = new AtomicInteger(Color.WHITE);
 
     /**
      * Setup the app when main activity is created
@@ -137,6 +142,13 @@ public class LineDrawer implements Drawer {
             Vector3f p = biquadFilter.update(newPoint);
             mLastPoint = new Vector3f(p);
             mStrokes.get(mStrokes.size() - 1).add(mLastPoint);
+        }
+    }
+
+    public void setColor(int color){
+        if(color != this.color.get()) {
+            this.color.set(color);
+            mLineShaderRenderer.bNeedsUpdate.set(true);
         }
     }
 
@@ -208,7 +220,7 @@ public class LineDrawer implements Drawer {
             }
             mLineShaderRenderer.setDrawDebug(bLineParameters.get());
             if (mLineShaderRenderer.bNeedsUpdate.get()) {
-                mLineShaderRenderer.setColor(AppSettings.getColor());
+                mLineShaderRenderer.setColor(colorToVector(color.get()));
                 mLineShaderRenderer.mDrawDistance = AppSettings.getStrokeDrawDistance();
                 mLineShaderRenderer.setDistanceScale(mDistanceScale);
                 mLineShaderRenderer.setLineWidth(mLineWidthMax);
@@ -220,6 +232,14 @@ public class LineDrawer implements Drawer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private Vector3f colorToVector(int color){
+        return new Vector3f(
+                Color.red(color) / 255f,
+                Color.green(color) / 255f,
+                Color.blue(color) / 255f
+        );
     }
 
     public void onDraw(final Frame arCoreFrame, final float[] cameramtx, final float[] projmtx, float lightIntensity){

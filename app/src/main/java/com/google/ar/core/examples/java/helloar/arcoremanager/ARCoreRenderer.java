@@ -103,7 +103,6 @@ public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView
             // compared to arcoreFrame rate.
             handleTaps(arcoreFrame);
 
-
             if (mSettings.drawBackground.get()) {
                 // Draw background.
                 mBackgroundDrawer.onDraw(arcoreFrame, null, null, 0);
@@ -113,6 +112,9 @@ public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView
             if (arcoreFrame.getTrackingState() == Frame.TrackingState.NOT_TRACKING) {
                 return;
             }
+
+            //handle color change
+            mlineDrawer.setColor(mSettings.linesColor.get());
 
             // Get projection matrix.
             final float[] projMatrix = new float[16];

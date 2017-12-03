@@ -89,8 +89,8 @@ public class SettingsView extends FrameLayout {
                 .setPositiveButton("ok", new ColorPickerClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
-                        linesColor.setBackgroundColor(settings.linesColor.get());
                         settings.linesColor.set(selectedColor);
+                        linesColor.setBackgroundColor(settings.linesColor.get());
                     }
                 })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {

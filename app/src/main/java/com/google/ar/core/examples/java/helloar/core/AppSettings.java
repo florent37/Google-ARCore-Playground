@@ -3,7 +3,6 @@ package com.google.ar.core.examples.java.helloar.core;
 import javax.vecmath.Vector3f;
 
 public class AppSettings {
-    private static final Vector3f color = new Vector3f(1f, 1f, 1f);
     private static final float strokeDrawDistance = 0.125f;
     private static final float minDistance = 0.000625f;
     private static final float nearClip = 0.001f;
@@ -12,10 +11,6 @@ public class AppSettings {
 
     public static float getStrokeDrawDistance() {
         return strokeDrawDistance;
-    }
-
-    public static Vector3f getColor() {
-        return color;
     }
 
     public static float getMinDistance() {
