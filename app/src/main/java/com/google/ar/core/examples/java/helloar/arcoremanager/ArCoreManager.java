@@ -18,6 +18,7 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import florent37.github.com.rxlifecycle.RxLifecycle;
 import io.reactivex.Observable;
@@ -131,22 +132,6 @@ public class ArCoreManager {
         mSettings.captureLines.set(captureLines);
     }
 
-    public void setDrawBackground(boolean active) {
-        mSettings.drawBackground.set(active);
-    }
-
-    public void setDrawDots(boolean active) {
-        mSettings.drawPoints.set(active);
-    }
-
-    public void setDrawPlanes(boolean active) {
-        mSettings.drawPlanes.set(active);
-    }
-
-    public void setLinesColor(int color) {
-        mSettings.linesColor.set(color);
-    }
-
     public Settings getSettings() {
         return mSettings;
     }
@@ -167,5 +152,6 @@ public class ArCoreManager {
         public final AtomicBoolean captureLines = new AtomicBoolean(false);
         public final AtomicBoolean drawPlanes = new AtomicBoolean(true);;
         public final AtomicInteger linesColor = new AtomicInteger(Color.WHITE);
+        public final AtomicReference<Float> linesDistance = new AtomicReference<Float>(0.125f);
     }
 }

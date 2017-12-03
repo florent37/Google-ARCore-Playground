@@ -66,11 +66,12 @@ public class LineUtils {
      * @param screenHeight
      * @param projectionMatrix
      * @param viewMatrix
+     * @param stokeDrawDistance
      * @return
      */
-    public static Vector3f GetWorldCoords(Vector2f touchPoint, float screenWidth, float screenHeight, float[] projectionMatrix, float[] viewMatrix) {
+    public static Vector3f GetWorldCoords(Vector2f touchPoint, float screenWidth, float screenHeight, float[] projectionMatrix, float[] viewMatrix, float stokeDrawDistance) {
         Ray touchRay = projectRay(touchPoint, screenWidth, screenHeight, projectionMatrix, viewMatrix);
-        touchRay.direction.scale(AppSettings.getStrokeDrawDistance());
+        touchRay.direction.scale(stokeDrawDistance);
         touchRay.origin.add(touchRay.direction);
         return touchRay.origin;
     }

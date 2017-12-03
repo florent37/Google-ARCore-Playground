@@ -114,7 +114,7 @@ public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView
             }
 
             //handle color change
-            mlineDrawer.setColor(mSettings.linesColor.get());
+            mlineDrawer.update(mSettings.linesColor.get(), mSettings.linesDistance.get());
 
             // Get projection matrix.
             final float[] projMatrix = new float[16];

@@ -22,6 +22,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.message)
     TextView message;
+
+    @BindView(R.id.configLocal)
+    ViewGroup configLocal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
         arCoreManager.setup(mSurfaceView);
 
-        //arCoreManager.addObjectToDraw(new BugDroidArCoreObject());
-        arCoreManager.addObjectToDraw(new SimpleArCoreObject("meuble.obj", "meuble.png"));
+        arCoreManager.addObjectToDraw(new BugDroidArCoreObject());
 
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
                     switch (item.getItemId()) {
@@ -101,9 +104,12 @@ public class MainActivity extends AppCompatActivity {
                             //Action quand onglet 1 sélectionné
                             return false;
                         case R.id.onTap_addAndroidObject:
+                            configLocal.removeAllViews();
                             arCoreManager.setCaptureLines(false);
                             return true;
                         case R.id.onTouch_addLines:
+                            configLocal.removeAllViews();
+                            configLocal.addView(new LinesSettings(this, arCoreManager.getSettings()));
                             arCoreManager.setCaptureLines(true);
                             return true;
                         default:

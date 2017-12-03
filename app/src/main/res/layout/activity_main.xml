@@ -36,8 +36,16 @@
         android:alpha="0"
         android:background="#3E3E3E"
         android:textColor="@android:color/white"
-        android:layout_above="@+id/bottomNav"
+        android:layout_above="@+id/configLocal"
         android:gravity="center"/>
+
+    <FrameLayout
+        android:id="@+id/configLocal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bottomNav">
+
+    </FrameLayout>
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottomNav"
