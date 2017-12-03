@@ -124,8 +124,8 @@ public class ArCoreManager {
         ARCoreRenderer.addObjectToDraw(arCoreObject);
     }
 
-    public Settings getSettings() {
-        return mSettings;
+    public void setCaptureLines(boolean captureLines) {
+        mSettings.captureLines.set(captureLines);
     }
 
     public interface Listener {

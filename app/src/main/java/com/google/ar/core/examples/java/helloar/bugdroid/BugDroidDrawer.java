@@ -16,7 +16,7 @@ import java.util.List;
 //We will draw bugdroids on each clicked positions
 public class BugDroidDrawer implements Drawer {
 
-    private final static String TAG = "BugDroidDrawer";
+    private final static String TAG = "BatmanDrawer";
 
     //the droid
     private final ObjectRenderer androidObject = new ObjectRenderer();

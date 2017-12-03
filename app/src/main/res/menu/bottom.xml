@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item
+    android:id="@+id/onTap_addAndroidObject"
+    android:icon="@drawable/ic_android_white_24dp"
+    android:title="BugDroid" />
+<item
+    android:id="@+id/onTouch_addLines"
+    android:icon="@drawable/ic_line_white_24dp"
+    android:title="Lines"/>
+<item
+    android:id="@+id/settings"
+    android:icon="@drawable/ic_settings_white_24dp"
+    android:title="Settings" />
+</menu>

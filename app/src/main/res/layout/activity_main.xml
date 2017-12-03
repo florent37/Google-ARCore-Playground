@@ -17,7 +17,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.google.ar.core.examples.java.helloar.HelloArActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.google.ar.core.examples.java.helloar.MainActivity">
 
     <android.opengl.GLSurfaceView
         android:id="@+id/surfaceview"
@@ -25,158 +26,27 @@
         android:layout_height="match_parent"
         android:layout_gravity="top" />
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:orientation="vertical"
-        >
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:text="test"
+        android:alpha="0"
+        android:background="#3E3E3E"
+        android:textColor="@android:color/white"
+        android:layout_above="@+id/bottomNav"
+        android:gravity="center"/>
 
-        <LinearLayout
-            android:id="@+id/onTouchLayout"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="@android:color/white"
-            android:orientation="vertical"
-            android:padding="8dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_weight="2"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/addLines"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_centerVertical="true"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="add lines"
-                    android:textColor="#3E3E3E" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="or"
-                    android:textColor="#3E3E3E"
-                    android:textStyle="bold" />
-
-
-                <TextView
-                    android:id="@+id/addObjects"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="add objects"
-                    android:alpha="0.6"
-                    android:textColor="#3E3E3E" />
-
-
-            </LinearLayout>
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/onTouch"
-            android:layout_width="100dp"
-            android:layout_height="40dp"
-            android:layout_gravity="right"
-            android:background="#3F51B5"
-            android:gravity="center"
-            android:text="on touch"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <LinearLayout
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottomNav"
         android:layout_width="match_parent"
+        android:background="@color/colorPrimary"
+        app:menu="@menu/bottom"
+        app:itemTextColor="@color/menu_selector"
+        app:itemIconTint="@color/menu_selector"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/configLayout"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:orientation="vertical">
-
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:text="draw background"
-                    android:textColor="#333" />
-
-                <android.support.v7.widget.AppCompatCheckBox
-                    android:id="@+id/drawBackground"
-                    android:checked="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:text="draw dots"
-                    android:textColor="#333" />
-
-                <android.support.v7.widget.AppCompatCheckBox
-                    android:id="@+id/drawDots"
-                    android:checked="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true" />
-
-            </RelativeLayout>
-
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/config"
-            android:layout_width="100dp"
-            android:layout_height="40dp"
-            android:layout_gravity="left"
-            android:background="#AD1457"
-            android:gravity="center"
-            android:text="config"
-            android:textStyle="bold" />
-
-
-    </LinearLayout>
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>
