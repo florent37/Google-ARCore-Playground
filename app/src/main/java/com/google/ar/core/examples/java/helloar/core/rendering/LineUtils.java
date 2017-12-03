@@ -17,7 +17,7 @@
 
 import android.opengl.Matrix;
 
-import com.google.ar.core.examples.java.helloar.AppSettings;
+import com.google.ar.core.examples.java.helloar.core.AppSettings;
 import com.google.ar.core.math.Ray;
 
 import javax.vecmath.Vector2f;

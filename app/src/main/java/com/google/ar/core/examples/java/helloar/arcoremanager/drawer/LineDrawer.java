@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.ar.core.examples.java.helloar.drawer;
+package com.google.ar.core.examples.java.helloar.arcoremanager.drawer;
 
 import android.content.Context;
 import android.opengl.Matrix;
@@ -23,7 +23,7 @@ import android.view.View;
 
 import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.AppSettings;
+import com.google.ar.core.examples.java.helloar.core.AppSettings;
 import com.google.ar.core.examples.java.helloar.arcoremanager.SizeManager;
 import com.google.ar.core.examples.java.helloar.core.rendering.BiquadFilter;
 import com.google.ar.core.examples.java.helloar.core.rendering.LineRenderer;

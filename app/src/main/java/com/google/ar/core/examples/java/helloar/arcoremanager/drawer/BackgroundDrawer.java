@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar.drawer;
+package com.google.ar.core.examples.java.helloar.arcoremanager.drawer;
 
 import android.content.Context;
 

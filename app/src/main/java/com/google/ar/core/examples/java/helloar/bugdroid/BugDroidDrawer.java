@@ -1,20 +1,17 @@
-package com.google.ar.core.examples.java.helloar.drawer;
+package com.google.ar.core.examples.java.helloar.bugdroid;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.ar.core.Frame;
-import com.google.ar.core.Plane;
-import com.google.ar.core.Session;
 import com.google.ar.core.examples.java.helloar.core.rendering.ObjectRenderer;
 import com.google.ar.core.examples.java.helloar.core.rendering.PlaneAttachment;
-import com.google.ar.core.examples.java.helloar.core.rendering.PlaneRenderer;
-import com.google.ar.core.examples.java.helloar.core.rendering.PointCloudRenderer;
-import com.google.ar.core.examples.java.helloar.drawer.Drawer;
+import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.Drawer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 //We will draw bugdroids on each clicked positions
 public class BugDroidDrawer implements Drawer {
@@ -25,10 +22,11 @@ public class BugDroidDrawer implements Drawer {
     private final ObjectRenderer androidObject = new ObjectRenderer();
     private final ObjectRenderer androidObjectShadow = new ObjectRenderer();
 
-    public final ArrayList<PlaneAttachment> mClickedPlanePositions = new ArrayList<>();
-
     // Temporary matrix allocated here to reduce number of allocations for each frame.
     private final float[] mAnchorMatrix = new float[16];
+
+    @Nullable
+    private List<PlaneAttachment> positions;
 
     public BugDroidDrawer() {
     }
@@ -49,24 +47,33 @@ public class BugDroidDrawer implements Drawer {
         }
     }
 
+    public void update(List<PlaneAttachment> positions){
+        if(this.positions != positions) {
+            this.positions = positions;
+        }
+    }
+
     @Override
     public void onDraw(Frame arcoreFrame, float[] cameraMatrix, float[] projMatrix, float lightIntensity) {
         // Visualize anchors created by touch.
         float scaleFactor = 1.0f;
-        for (PlaneAttachment planeAttachment : mClickedPlanePositions) {
-            if (!planeAttachment.isTracking()) {
-                continue;
-            }
-            // Get the current combined pose of an Anchor and Plane in world space. The Anchor
-            // and Plane poses are updated during calls to session.update() as ARCore refines
-            // its estimate of the world.
-            planeAttachment.getPose().toMatrix(mAnchorMatrix, 0);
+        if (positions != null) {
 
-            // Update and draw the model and its shadow.
-            androidObject.updateModelMatrix(mAnchorMatrix, scaleFactor);
-            androidObjectShadow.updateModelMatrix(mAnchorMatrix, scaleFactor);
-            androidObject.draw(cameraMatrix, projMatrix, lightIntensity);
-            androidObjectShadow.draw(cameraMatrix, projMatrix, lightIntensity);
+            for (PlaneAttachment planeAttachment : positions) {
+                if (!planeAttachment.isTracking()) {
+                    continue;
+                }
+                // Get the current combined pose of an Anchor and Plane in world space. The Anchor
+                // and Plane poses are updated during calls to session.update() as ARCore refines
+                // its estimate of the world.
+                planeAttachment.getPose().toMatrix(mAnchorMatrix, 0);
+
+                // Update and draw the model and its shadow.
+                androidObject.updateModelMatrix(mAnchorMatrix, scaleFactor);
+                androidObjectShadow.updateModelMatrix(mAnchorMatrix, scaleFactor);
+                androidObject.draw(cameraMatrix, projMatrix, lightIntensity);
+                androidObjectShadow.draw(cameraMatrix, projMatrix, lightIntensity);
+            }
         }
 
     }

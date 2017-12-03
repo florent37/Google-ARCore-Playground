@@ -25,6 +25,10 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.ar.core.examples.java.helloar.arcoremanager.ArCoreManager;
+import com.google.ar.core.examples.java.helloar.bugdroid.BugDroidArCoreObject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * This is a simple example that shows how to create an augmented reality (AR) application using
@@ -35,14 +39,18 @@ public class HelloArActivity extends AppCompatActivity {
 
     protected Snackbar mLoadingMessageSnackbar = null;
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
-    private GLSurfaceView mSurfaceView;
+    @BindView(R.id.surfaceview)
+    GLSurfaceView mSurfaceView;
+
     private ArCoreManager arCoreManager;
+
+    private BottomBarHolder bottomBarHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mSurfaceView = (GLSurfaceView) findViewById(R.id.surfaceview);
+        ButterKnife.bind(this);
 
         arCoreManager = new ArCoreManager(this, new ArCoreManager.Listener() {
             @Override
@@ -80,7 +88,11 @@ public class HelloArActivity extends AppCompatActivity {
                 });
             }
         });
+
         arCoreManager.setup(mSurfaceView);
+        arCoreManager.addObjectToDraw(new BugDroidArCoreObject());
+
+        bottomBarHolder = new BottomBarHolder(findViewById(android.R.id.content), arCoreManager.getSettings());
     }
 
     @Override

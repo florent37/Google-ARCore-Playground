@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar;
+package com.google.ar.core.examples.java.helloar.arcoremanager;
 
 import android.content.Context;
 import android.opengl.GLES20;
@@ -11,42 +11,41 @@ import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.PlaneHitResult;
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.arcoremanager.ArCoreManager;
-import com.google.ar.core.examples.java.helloar.arcoremanager.SizeManager;
+import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.PlaneDrawer;
+import com.google.ar.core.examples.java.helloar.core.AppSettings;
+import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.BackgroundDrawer;
+import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.LineDrawer;
+import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.PointCloudDrawer;
 import com.google.ar.core.examples.java.helloar.core.AbstractDrawManager;
-import com.google.ar.core.examples.java.helloar.core.rendering.PlaneAttachment;
-import com.google.ar.core.examples.java.helloar.drawer.BackgroundDrawer;
-import com.google.ar.core.examples.java.helloar.drawer.BugDroidDrawer;
-import com.google.ar.core.examples.java.helloar.drawer.LineDrawer;
-import com.google.ar.core.examples.java.helloar.drawer.PointCloudDrawer;
 import com.google.ar.core.exceptions.NotTrackingException;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Renderer {
-    static final int MAX_OBJECTS_ON_SCREEN = 16;
+public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView.Renderer {
 
     //the objects opengl will draw
     private final BackgroundDrawer mBackgroundDrawer;
 
-    private final BugDroidDrawer mBugDroidDrawer;
     private final PointCloudDrawer mPointCloudDrawer;
+    private final PlaneDrawer mPlaneDrawer;
     private final LineDrawer mlineDrawer;
 
     private final ArCoreManager.Settings mSettings;
 
     private final SizeManager sizeManager = new SizeManager();
 
-    public DrawManager(Context context, Session arCoreSession, ArCoreManager.Settings settings) {
+    private final List<ARCoreObject> arCoreObjectList = new ArrayList<>();
+    private ARCoreObject currentARCoreObject = null;
+
+    public ARCoreRenderer(Context context, Session arCoreSession, ArCoreManager.Settings settings) {
         super(context, arCoreSession);
         mSettings = settings;
         mBackgroundDrawer = new BackgroundDrawer(arCoreSession);
-
-        mBugDroidDrawer = new BugDroidDrawer();
-
+        mPlaneDrawer = new PlaneDrawer(arCoreSession);
         mPointCloudDrawer = new PointCloudDrawer();
 
         mlineDrawer = new LineDrawer(context, arCoreSession, sizeManager);
@@ -58,9 +57,11 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
         // Create the texture and pass it to ARCore session to be filled during update().
 
         mBackgroundDrawer.prepare(mContext);
-
+        mPlaneDrawer.prepare(mContext);
         mPointCloudDrawer.prepare(mContext);
-        mBugDroidDrawer.prepare(mContext);
+        for (ARCoreObject arCoreObject : arCoreObjectList) {
+            arCoreObject.prepare(mContext);
+        }
         mlineDrawer.prepare(mContext);
     }
 
@@ -103,7 +104,7 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
             handleTaps(arcoreFrame);
 
 
-            if(mSettings.drawBackground.get()){
+            if (mSettings.drawBackground.get()) {
                 // Draw background.
                 mBackgroundDrawer.onDraw(arcoreFrame, null, null, 0);
             }
@@ -125,11 +126,18 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
             final float lightIntensity = arcoreFrame.getLightEstimate().getPixelIntensity();
 
             //draw
-            if(mSettings.drawPoints.get()) {
+            if (mSettings.drawPoints.get()) {
                 mPointCloudDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
             }
 
-            mBugDroidDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
+            //draw
+            if (mSettings.drawPlanes.get()) {
+                mPlaneDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
+            }
+
+            for (ARCoreObject arCoreObject : arCoreObjectList) {
+                arCoreObject.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
+            }
             mlineDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
@@ -146,18 +154,10 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
             for (HitResult hit : frame.hitTest(tap)) {
                 // Check if any plane was hit, and if it was hit inside the plane polygon.
                 if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
-                    // Cap the number of objects created. This avoids overloading both the
-                    // rendering system and ARCore.
-                    if (mBugDroidDrawer.mClickedPlanePositions.size() >= MAX_OBJECTS_ON_SCREEN) {
-                        mArcoreSession.removeAnchors(Arrays.asList(mBugDroidDrawer.mClickedPlanePositions.get(0).getAnchor()));
-                        mBugDroidDrawer.mClickedPlanePositions.remove(0);
+
+                    if (currentARCoreObject != null) {
+                        currentARCoreObject.addPlaneAttachment((PlaneHitResult) hit, mArcoreSession);
                     }
-                    // Adding an Anchor tells ARCore that it should track this position in
-                    // space. This anchor will be used in PlaneAttachment to place the 3d model
-                    // in the correct position relative both to the world and to the plane.
-                    mBugDroidDrawer.mClickedPlanePositions.add(new PlaneAttachment(
-                            ((PlaneHitResult) hit).getPlane(),
-                            mArcoreSession.addAnchor(hit.getHitPose())));
 
                     // Hits are sorted by depth. Consider only closest hit on a plane.
                     break;
@@ -178,5 +178,12 @@ public class DrawManager extends AbstractDrawManager implements GLSurfaceView.Re
      */
     public boolean handleDrawingTouch(MotionEvent event) {
         return mlineDrawer.handleDrawingTouch(event);
+    }
+
+    public void addObjectToDraw(ARCoreObject arCoreObject) {
+        arCoreObjectList.add(arCoreObject);
+        if (this.currentARCoreObject == null) {
+            currentARCoreObject = arCoreObject;
+        }
     }
 }

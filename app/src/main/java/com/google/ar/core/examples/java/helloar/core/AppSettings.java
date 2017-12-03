@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar;
+package com.google.ar.core.examples.java.helloar.core;
 
 import javax.vecmath.Vector3f;
 

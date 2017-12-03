@@ -35,7 +35,7 @@
             android:name=".HelloArActivity"
             android:label="@string/app_name"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:theme="@style/AppBaseTheme"
             android:screenOrientation="locked">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -3,13 +3,15 @@ package com.google.ar.core.examples.java.helloar.arcoremanager;
 import android.Manifest;
 import android.opengl.GLSurfaceView;
 import android.support.annotation.NonNull;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.google.ar.core.Config;
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.DrawManager;
-import com.google.ar.core.examples.java.helloar.SurfaceTouchListener;
+import com.google.ar.core.examples.java.helloar.core.AbstractDrawManager;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,11 +22,12 @@ import io.reactivex.Observable;
 public class ArCoreManager {
 
     private final AppCompatActivity mActivity;
+
     private final Session mArcoreSession;
     private final Config mDefaultConfig;
     private final Listener mListener;
-    private final AtomicBoolean mCapturingLines = new AtomicBoolean(false);
-    private DrawManager drawManager;
+
+    private ARCoreRenderer ARCoreRenderer;
     private GLSurfaceView mSurfaceView;
 
     private final Settings mSettings = new Settings();
@@ -43,7 +46,7 @@ public class ArCoreManager {
     }
 
     public void setup(final GLSurfaceView surfaceView) {
-        drawManager = new DrawManager(mActivity, mArcoreSession, mSettings);
+        ARCoreRenderer = new ARCoreRenderer(mActivity, mArcoreSession, mSettings);
 
         this.mSurfaceView = surfaceView;
 
@@ -51,26 +54,32 @@ public class ArCoreManager {
         surfaceView.setPreserveEGLContextOnPause(true);
         surfaceView.setEGLContextClientVersion(2);
         surfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Alpha used for plane blending.
-        surfaceView.setRenderer(drawManager);
+        surfaceView.setRenderer(ARCoreRenderer);
         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
-        surfaceView.setOnTouchListener(new SurfaceTouchListener(mActivity, new SurfaceTouchListener.Listener() {
-            @Override
-            public boolean onSingleTap(MotionEvent event) {
-                if (!mCapturingLines.get()) {
-                    drawManager.addSingleTapEvent(event);
+        surfaceView.setOnTouchListener(new View.OnTouchListener() {
+
+            private final GestureDetectorCompat mGestureDetector = new GestureDetectorCompat(mActivity, new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onSingleTapUp(MotionEvent event) {
+                    ARCoreRenderer.addSingleTapEvent(event);
+                    return true;
                 }
-                return true;
-            }
+            });
+
 
             @Override
-            public boolean onTouchEvent(MotionEvent event) {
-                if (mCapturingLines.get()) {
-                    return drawManager.handleDrawingTouch(event); //for drawing
+            public boolean onTouch(View view, MotionEvent event) {
+                if(mSettings.captureLines.get()){
+                    return ARCoreRenderer.handleDrawingTouch(event); //for drawing
+                } else {
+                    if (mGestureDetector.onTouchEvent(event)) {
+                        return false;
+                    }
+                    return true;
                 }
-                return true;
             }
-        }));
+        });
 
         // ARCore requires camera permissions to operate. If we did not yet obtain runtime
         // permission on Android M and above, now is a good time to ask the user for it.
@@ -100,10 +109,23 @@ public class ArCoreManager {
                     mSurfaceView.onPause();
                     mArcoreSession.pause();
                 });
+
+        ARCoreRenderer.setListener(new AbstractDrawManager.Listener() {
+            @Override
+            public void hideLoading() {
+                if (mListener != null) {
+                    mListener.hideLoadingMessage();
+                }
+            }
+        });
     }
 
-    public void drawPoints(boolean draw) {
+    public void addObjectToDraw(ARCoreObject arCoreObject){
+        ARCoreRenderer.addObjectToDraw(arCoreObject);
+    }
 
+    public Settings getSettings() {
+        return mSettings;
     }
 
     public interface Listener {
@@ -119,5 +141,7 @@ public class ArCoreManager {
     public static class Settings {
         public final AtomicBoolean drawBackground = new AtomicBoolean(true);
         public final AtomicBoolean drawPoints = new AtomicBoolean(true);
+        public final AtomicBoolean captureLines = new AtomicBoolean(false);
+        public final AtomicBoolean drawPlanes = new AtomicBoolean(true);;
     }
 }
