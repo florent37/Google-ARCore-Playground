@@ -61,6 +61,22 @@ public class SimpleArCoreObjectDrawer implements ARCoreObjectDrawer {
     }
 
     @Override
+    public void rotate(float angle) {
+        if (!positions.isEmpty()) {
+            final ArCoreObject last = positions.get(positions.size() - 1);
+            last.setRotation(angle);
+        }
+    }
+
+    @Override
+    public void translate(float distanceX, float distanceY) {
+        if (!positions.isEmpty()) {
+            final ArCoreObject last = positions.get(positions.size() - 1);
+            last.setTranslation(distanceX, distanceY);
+        }
+    }
+
+    @Override
     public void onDraw(ARCanvas arCanvas) {
         // Visualize anchors created by touch.
         for (ArCoreObject arCoreObject : positions) {
@@ -79,7 +95,7 @@ public class SimpleArCoreObjectDrawer implements ARCoreObjectDrawer {
         arCoreObject.getPlaneAttachment().getPose().toMatrix(mAnchorMatrix, 0);
 
         // Update and draw the model and its shadow.
-        objectRenderer.updateModelMatrix(mAnchorMatrix, arCoreObject.getScale());
+        objectRenderer.updateModelMatrix(mAnchorMatrix, arCoreObject.getScale(), arCoreObject.getRotation(), arCoreObject.getTranslationX(), arCoreObject.getTranslationZ());
         objectRenderer.draw(arCanvas.getCameraMatrix(), arCanvas.getProjMatrix(), arCanvas.getLightIntensity());
     }
 

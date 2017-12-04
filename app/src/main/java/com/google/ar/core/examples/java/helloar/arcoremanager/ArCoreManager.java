@@ -13,6 +13,7 @@ import android.view.View;
 
 import com.google.ar.core.Config;
 import com.google.ar.core.Session;
+import com.google.ar.core.examples.java.helloar.RotationGestureDetector;
 import com.google.ar.core.examples.java.helloar.arcoremanager.object.ARCoreObjectDrawer;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
@@ -34,6 +35,7 @@ public class ArCoreManager {
     private ARCoreRenderer ARCoreRenderer;
     private GLSurfaceView mSurfaceView;
 
+    private ObjectTouchMode touchMode = ObjectTouchMode.SCALE;
     private final Settings mSettings = new Settings();
 
     public ArCoreManager(AppCompatActivity activity, @NonNull Listener listener) {
@@ -70,7 +72,11 @@ public class ArCoreManager {
                     return true;
                 }
 
-
+                @Override
+                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                    ARCoreRenderer.onTranslate(distanceX, distanceY);
+                    return true;
+                }
             });
 
             private ScaleGestureDetector mScaleDetector = new ScaleGestureDetector(mActivity, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -81,16 +87,36 @@ public class ArCoreManager {
                 }
             });
 
-
+            private RotationGestureDetector mRotationDetector = new RotationGestureDetector(new RotationGestureDetector.OnRotationGestureListener() {
+                @Override
+                public void OnRotation(RotationGestureDetector rotationDetector) {
+                    ARCoreRenderer.onRotate(rotationDetector.getAngle());
+                }
+            });
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 if(mSettings.captureLines.get()){
                     return ARCoreRenderer.handleDrawingTouch(event); //for drawing
                 } else {
-                    boolean res = mScaleDetector.onTouchEvent(event);
-                    if (!mScaleDetector.isInProgress()) {
-                        if(mGestureDetector.onTouchEvent(event)){
+                    boolean res = true;
+                    if (touchMode == ObjectTouchMode.SCALE) {
+                        res = mScaleDetector.onTouchEvent(event);
+                        if (!mScaleDetector.isInProgress()) {
+                            if (mGestureDetector.onTouchEvent(event)) {
+                                return false;
+                            }
+                        }
+                        return res;
+                    } else if(touchMode == ObjectTouchMode.ROTATE){
+                        res = mRotationDetector.onTouchEvent(event);
+                        if (!res) {
+                            if (mGestureDetector.onTouchEvent(event)) {
+                                return false;
+                            }
+                        }
+                    } else if(touchMode == ObjectTouchMode.TRANSLATE){
+                        if (mGestureDetector.onTouchEvent(event)) {
                             return false;
                         }
                     }
@@ -150,6 +176,10 @@ public class ArCoreManager {
         return mSettings;
     }
 
+    public void setTouchMode(ObjectTouchMode objectTouchMode) {
+        this.touchMode = objectTouchMode;
+    }
+
     public interface Listener {
         void onArCoreUnsuported();
 
@@ -167,5 +197,11 @@ public class ArCoreManager {
         public final AtomicBoolean drawPlanes = new AtomicBoolean(true);;
         public final AtomicInteger linesColor = new AtomicInteger(Color.WHITE);
         public final AtomicReference<Float> linesDistance = new AtomicReference<Float>(0.125f);
+    }
+
+    public enum ObjectTouchMode{
+        SCALE,
+        ROTATE,
+        TRANSLATE
     }
 }

@@ -35,8 +35,8 @@ public class BugDroidArCoreObjectDrawer extends SimpleArCoreObjectDrawer {
             bugDroid.getPlaneAttachment().getPose().toMatrix(mAnchorMatrix, 0);
 
             // Update and draw the model and its shadow.
-            super.objectRenderer.updateModelMatrix(mAnchorMatrix, bugDroid.getScale());
-            androidObjectShadow.updateModelMatrix(mAnchorMatrix, bugDroid.getScale());
+            super.objectRenderer.updateModelMatrix(mAnchorMatrix, bugDroid.getScale(), bugDroid.getRotation(), bugDroid.getTranslationX(), bugDroid.getTranslationZ());
+            androidObjectShadow.updateModelMatrix(mAnchorMatrix, bugDroid.getScale(), bugDroid.getRotation(), bugDroid.getTranslationX(), bugDroid.getTranslationZ());
             super.objectRenderer.draw(canvas.getCameraMatrix(), canvas.getProjMatrix(), canvas.getLightIntensity());
             androidObjectShadow.draw(canvas.getCameraMatrix(), canvas.getProjMatrix(), canvas.getLightIntensity());
         }

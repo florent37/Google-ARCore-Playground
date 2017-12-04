@@ -238,13 +238,16 @@ public class ObjectRenderer {
      * @param scaleFactor A separate scaling factor to apply before the {@code modelMatrix}.
      * @see android.opengl.Matrix
      */
-    public void updateModelMatrix(float[] modelMatrix, float scaleFactor) {
+    public void updateModelMatrix(float[] modelMatrix, float scaleFactor, float rotationY, float translationX, float translationZ) {
         float[] scaleMatrix = new float[16];
         Matrix.setIdentityM(scaleMatrix, 0);
         scaleMatrix[0] = scaleFactor;
         scaleMatrix[5] = scaleFactor;
         scaleMatrix[10] = scaleFactor;
         Matrix.multiplyMM(mModelMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
+
+        Matrix.translateM(mModelMatrix, 0, translationX, 0f, translationZ);
+        Matrix.rotateM(mModelMatrix, 0, rotationY, 0f, 1f, 0f);
     }
 
     /**
@@ -272,7 +275,7 @@ public class ObjectRenderer {
      * @param lightIntensity  Illumination intensity.  Combined with diffuse and specular material
      *     properties.
      * @see #setBlendMode(BlendMode)
-     * @see #updateModelMatrix(float[], float)
+     * @see #updateModelMatrix(float[], float, float)
      * @see #setMaterialProperties(float, float, float, float)
      * @see android.opengl.Matrix
      */

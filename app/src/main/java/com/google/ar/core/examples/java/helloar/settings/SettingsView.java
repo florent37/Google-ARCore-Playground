@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar;
+package com.google.ar.core.examples.java.helloar.settings;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,6 +12,7 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.arcoremanager.ArCoreManager;
 
 import butterknife.BindView;

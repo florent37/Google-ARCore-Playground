@@ -224,6 +224,18 @@ public class ARCoreRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    public void onRotate(float angle) {
+        if (currentARCoreObjectDrawer != null) {
+            currentARCoreObjectDrawer.rotate(angle);
+        }
+    }
+
+    public void onTranslate(float distanceX, float distanceY) {
+        if (currentARCoreObjectDrawer != null) {
+            currentARCoreObjectDrawer.translate(distanceX, distanceY);
+        }
+    }
+
 
     public interface Listener {
         void hideLoading();

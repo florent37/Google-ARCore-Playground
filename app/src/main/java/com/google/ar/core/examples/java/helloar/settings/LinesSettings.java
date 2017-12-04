@@ -1,10 +1,11 @@
-package com.google.ar.core.examples.java.helloar;
+package com.google.ar.core.examples.java.helloar.settings;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 
+import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.arcoremanager.ArCoreManager;
 
 import butterknife.BindView;

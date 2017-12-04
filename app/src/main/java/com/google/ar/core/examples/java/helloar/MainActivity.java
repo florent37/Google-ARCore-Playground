@@ -29,6 +29,9 @@ import android.widget.Toast;
 
 import com.google.ar.core.examples.java.helloar.arcoremanager.ArCoreManager;
 import com.google.ar.core.examples.java.helloar.arcoremanager.object.BugDroidArCoreObjectDrawer;
+import com.google.ar.core.examples.java.helloar.settings.LinesSettings;
+import com.google.ar.core.examples.java.helloar.settings.ObjectSettings;
+import com.google.ar.core.examples.java.helloar.settings.SettingsView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -104,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
                             return false;
                         case R.id.onTap_addAndroidObject:
                             configLocal.removeAllViews();
+                            configLocal.addView(new ObjectSettings(this, objectTouchMode -> arCoreManager.setTouchMode(objectTouchMode)));
                             arCoreManager.setCaptureLines(false);
                             return true;
                         case R.id.onTouch_addLines:
@@ -117,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        bottomNavigationView.setSelectedItemId(R.id.onTap_addAndroidObject);
     }
 
     private void openSettings() {
