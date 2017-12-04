@@ -31,12 +31,10 @@ public class ArCoreManager {
     private final Session mArcoreSession;
     private final Config mDefaultConfig;
     private final Listener mListener;
-
+    private final Settings mSettings = new Settings();
     private ARCoreRenderer ARCoreRenderer;
     private GLSurfaceView mSurfaceView;
-
     private ObjectTouchMode touchMode = ObjectTouchMode.SCALE;
-    private final Settings mSettings = new Settings();
 
     public ArCoreManager(AppCompatActivity activity, @NonNull Listener listener) {
         this.mActivity = activity;
@@ -74,29 +72,39 @@ public class ArCoreManager {
 
                 @Override
                 public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                    ARCoreRenderer.onTranslate(distanceX, distanceY);
-                    return true;
+                    if (touchMode == ObjectTouchMode.TRANSLATE) {
+                        ARCoreRenderer.onTranslate(-distanceX / 100f, -distanceY / 500f);
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
             });
 
             private ScaleGestureDetector mScaleDetector = new ScaleGestureDetector(mActivity, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                 @Override
                 public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
-                    ARCoreRenderer.onScale(scaleGestureDetector.getScaleFactor());
-                    return true;
+                    if (touchMode == ObjectTouchMode.SCALE) {
+                        ARCoreRenderer.onScale(scaleGestureDetector.getScaleFactor());
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
             });
 
             private RotationGestureDetector mRotationDetector = new RotationGestureDetector(new RotationGestureDetector.OnRotationGestureListener() {
                 @Override
                 public void OnRotation(RotationGestureDetector rotationDetector) {
-                    ARCoreRenderer.onRotate(rotationDetector.getAngle());
+                    if (touchMode == ObjectTouchMode.ROTATE) {
+                        ARCoreRenderer.onRotate(rotationDetector.getAngle());
+                    }
                 }
             });
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                if(mSettings.captureLines.get()){
+                if (mSettings.captureLines.get()) {
                     return ARCoreRenderer.handleDrawingTouch(event); //for drawing
                 } else {
                     boolean res = true;
@@ -108,14 +116,14 @@ public class ArCoreManager {
                             }
                         }
                         return res;
-                    } else if(touchMode == ObjectTouchMode.ROTATE){
+                    } else if (touchMode == ObjectTouchMode.ROTATE) {
                         res = mRotationDetector.onTouchEvent(event);
                         if (!res) {
                             if (mGestureDetector.onTouchEvent(event)) {
                                 return false;
                             }
                         }
-                    } else if(touchMode == ObjectTouchMode.TRANSLATE){
+                    } else if (touchMode == ObjectTouchMode.TRANSLATE) {
                         if (mGestureDetector.onTouchEvent(event)) {
                             return false;
                         }
@@ -164,7 +172,7 @@ public class ArCoreManager {
         });
     }
 
-    public void addObjectToDraw(ARCoreObjectDrawer arCoreObjectDrawer){
+    public void addObjectToDraw(ARCoreObjectDrawer arCoreObjectDrawer) {
         ARCoreRenderer.addObjectToDraw(arCoreObjectDrawer);
     }
 
@@ -178,6 +186,12 @@ public class ArCoreManager {
 
     public void setTouchMode(ObjectTouchMode objectTouchMode) {
         this.touchMode = objectTouchMode;
+    }
+
+    public enum ObjectTouchMode {
+        SCALE,
+        ROTATE,
+        TRANSLATE
     }
 
     public interface Listener {
@@ -194,14 +208,9 @@ public class ArCoreManager {
         public final AtomicBoolean drawBackground = new AtomicBoolean(true);
         public final AtomicBoolean drawPoints = new AtomicBoolean(true);
         public final AtomicBoolean captureLines = new AtomicBoolean(false);
-        public final AtomicBoolean drawPlanes = new AtomicBoolean(true);;
+        public final AtomicBoolean drawPlanes = new AtomicBoolean(true);
+        ;
         public final AtomicInteger linesColor = new AtomicInteger(Color.WHITE);
         public final AtomicReference<Float> linesDistance = new AtomicReference<Float>(0.125f);
-    }
-
-    public enum ObjectTouchMode{
-        SCALE,
-        ROTATE,
-        TRANSLATE
     }
 }

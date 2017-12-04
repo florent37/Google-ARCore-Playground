@@ -40,8 +40,8 @@ public class ArCoreObject {
     }
 
     public void setTranslation(float distanceX, float distanceZ) {
-        translationX = distanceX;
-        translationZ = distanceZ;
+        translationX += distanceX;
+        translationZ += distanceZ;
     }
 
     public float getTranslationX() {
