@@ -241,13 +241,13 @@ public class ObjectRenderer {
     public void updateModelMatrix(float[] modelMatrix, float scaleFactor, float rotationY, float translationX, float translationZ) {
         float[] scaleMatrix = new float[16];
         Matrix.setIdentityM(scaleMatrix, 0);
-        scaleMatrix[0] = scaleFactor;
-        scaleMatrix[5] = scaleFactor;
-        scaleMatrix[10] = scaleFactor;
+        scaleMatrix[0] = 1f;
+        scaleMatrix[5] = 1f;
+        scaleMatrix[10] = 1f;
         Matrix.multiplyMM(mModelMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
-
         Matrix.translateM(mModelMatrix, 0, translationX, 0f, translationZ);
         Matrix.rotateM(mModelMatrix, 0, rotationY, 0f, 1f, 0f);
+        Matrix.scaleM(mModelMatrix, 0, scaleFactor, scaleFactor, scaleFactor);
     }
 
     /**
