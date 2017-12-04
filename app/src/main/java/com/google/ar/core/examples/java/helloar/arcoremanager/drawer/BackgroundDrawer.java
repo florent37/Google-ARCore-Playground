@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
+import com.google.ar.core.examples.java.helloar.core.ARCanvas;
 import com.google.ar.core.examples.java.helloar.core.rendering.BackgroundRenderer;
 
 public class BackgroundDrawer implements Drawer {
@@ -25,7 +26,7 @@ public class BackgroundDrawer implements Drawer {
     }
 
     @Override
-    public void onDraw(Frame arcoreFrame, float[] cameraMatrix, float[] projMatrix, float lightIntensity) {
-        background.draw(arcoreFrame);
+    public void onDraw(ARCanvas arCanvas) {
+        background.draw(arCanvas.getArcoreFrame());
     }
 }

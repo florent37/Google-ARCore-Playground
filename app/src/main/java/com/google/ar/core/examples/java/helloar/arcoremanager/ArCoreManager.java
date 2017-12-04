@@ -8,12 +8,12 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import com.google.ar.core.Config;
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.SettingsView;
-import com.google.ar.core.examples.java.helloar.core.AbstractDrawManager;
+import com.google.ar.core.examples.java.helloar.arcoremanager.object.ARCoreObjectDrawer;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -69,7 +69,18 @@ public class ArCoreManager {
                     ARCoreRenderer.addSingleTapEvent(event);
                     return true;
                 }
+
+
             });
+
+            private ScaleGestureDetector mScaleDetector = new ScaleGestureDetector(mActivity, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                @Override
+                public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
+                    ARCoreRenderer.onScale(scaleGestureDetector.getScaleFactor());
+                    return true;
+                }
+            });
+
 
 
             @Override
@@ -77,10 +88,13 @@ public class ArCoreManager {
                 if(mSettings.captureLines.get()){
                     return ARCoreRenderer.handleDrawingTouch(event); //for drawing
                 } else {
-                    if (mGestureDetector.onTouchEvent(event)) {
-                        return false;
+                    boolean res = mScaleDetector.onTouchEvent(event);
+                    if (!mScaleDetector.isInProgress()) {
+                        if(mGestureDetector.onTouchEvent(event)){
+                            return false;
+                        }
                     }
-                    return true;
+                    return res;
                 }
             }
         });
@@ -114,7 +128,7 @@ public class ArCoreManager {
                     mArcoreSession.pause();
                 });
 
-        ARCoreRenderer.setListener(new AbstractDrawManager.Listener() {
+        ARCoreRenderer.setListener(new ARCoreRenderer.Listener() {
             @Override
             public void hideLoading() {
                 if (mListener != null) {
@@ -124,8 +138,8 @@ public class ArCoreManager {
         });
     }
 
-    public void addObjectToDraw(ARCoreObject arCoreObject){
-        ARCoreRenderer.addObjectToDraw(arCoreObject);
+    public void addObjectToDraw(ARCoreObjectDrawer arCoreObjectDrawer){
+        ARCoreRenderer.addObjectToDraw(arCoreObjectDrawer);
     }
 
     public void setCaptureLines(boolean captureLines) {

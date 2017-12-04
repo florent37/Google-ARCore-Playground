@@ -22,7 +22,7 @@
             android:id="@+id/linesDistance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="100"
+            android:max="300"
             android:min="1"
             android:paddingBottom="16dp"
             android:paddingTop="16dp" />

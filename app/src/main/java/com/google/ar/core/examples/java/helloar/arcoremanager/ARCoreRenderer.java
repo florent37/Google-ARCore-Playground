@@ -3,6 +3,7 @@ package com.google.ar.core.examples.java.helloar.arcoremanager;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -11,44 +12,56 @@ import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.PlaneHitResult;
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.PlaneDrawer;
-import com.google.ar.core.examples.java.helloar.core.AppSettings;
 import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.BackgroundDrawer;
 import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.LineDrawer;
+import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.PlaneDrawer;
 import com.google.ar.core.examples.java.helloar.arcoremanager.drawer.PointCloudDrawer;
-import com.google.ar.core.examples.java.helloar.core.AbstractDrawManager;
+import com.google.ar.core.examples.java.helloar.arcoremanager.object.ARCoreObjectDrawer;
+import com.google.ar.core.examples.java.helloar.core.ARCanvas;
+import com.google.ar.core.examples.java.helloar.core.AppSettings;
 import com.google.ar.core.exceptions.NotTrackingException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView.Renderer {
+public class ARCoreRenderer implements GLSurfaceView.Renderer {
+
+    private static final String TAG = "ARCoreRenderer";
+
+    // Tap handling and UI.
+    private final ArrayBlockingQueue<MotionEvent> mQueuedSingleTaps = new ArrayBlockingQueue<>(16);
+
+    private final Context mContext;
+    private final Session mArcoreSession;
 
     //the objects opengl will draw
     private final BackgroundDrawer mBackgroundDrawer;
-
     private final PointCloudDrawer mPointCloudDrawer;
     private final PlaneDrawer mPlaneDrawer;
     private final LineDrawer mlineDrawer;
-
     private final ArCoreManager.Settings mSettings;
 
-    private final SizeManager sizeManager = new SizeManager();
+    private final List<ARCoreObjectDrawer> arCoreObjectDrawerList = new ArrayList<>();
+    @Nullable
+    private ARCoreObjectDrawer currentARCoreObjectDrawer = null;
 
-    private final List<ARCoreObject> arCoreObjectList = new ArrayList<>();
-    private ARCoreObject currentARCoreObject = null;
+    @Nullable
+    private Listener mListener;
+
 
     public ARCoreRenderer(Context context, Session arCoreSession, ArCoreManager.Settings settings) {
-        super(context, arCoreSession);
+        this.mContext = context;
+        this.mArcoreSession = arCoreSession;
         mSettings = settings;
         mBackgroundDrawer = new BackgroundDrawer(arCoreSession);
         mPlaneDrawer = new PlaneDrawer(arCoreSession);
         mPointCloudDrawer = new PointCloudDrawer();
 
-        mlineDrawer = new LineDrawer(context, arCoreSession, sizeManager);
+        mlineDrawer = new LineDrawer(context, arCoreSession);
     }
 
     @Override
@@ -59,8 +72,8 @@ public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView
         mBackgroundDrawer.prepare(mContext);
         mPlaneDrawer.prepare(mContext);
         mPointCloudDrawer.prepare(mContext);
-        for (ARCoreObject arCoreObject : arCoreObjectList) {
-            arCoreObject.prepare(mContext);
+        for (ARCoreObjectDrawer arCoreObjectDrawer : arCoreObjectDrawerList) {
+            arCoreObjectDrawer.prepare(mContext);
         }
         mlineDrawer.prepare(mContext);
     }
@@ -72,10 +85,11 @@ public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView
         // the video background can be properly adjusted.
         mArcoreSession.setDisplayGeometry(width, height);
 
-        sizeManager.width.set(width);
-        sizeManager.height.set(height);
+        arCanvas.setWidth(width);
+        arCanvas.setHeight(height);
     }
 
+    private final ARCanvas arCanvas = new ARCanvas();
 
     @Override
     public void onDrawFrame(GL10 gl) {
@@ -103,9 +117,11 @@ public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView
             // compared to arcoreFrame rate.
             handleTaps(arcoreFrame);
 
+            arCanvas.setArcoreFrame(arcoreFrame);
+
             if (mSettings.drawBackground.get()) {
                 // Draw background.
-                mBackgroundDrawer.onDraw(arcoreFrame, null, null, 0);
+                mBackgroundDrawer.onDraw(arCanvas);
             }
 
             // If not tracking, don't draw 3d objects.
@@ -127,20 +143,24 @@ public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView
             // Compute lighting from average intensity of the image.
             final float lightIntensity = arcoreFrame.getLightEstimate().getPixelIntensity();
 
+            arCanvas.setProjMatrix(projMatrix);
+            arCanvas.setCameraMatrix(cameraMatrix);
+            arCanvas.setLightIntensity(lightIntensity);
+
             //draw
             if (mSettings.drawPoints.get()) {
-                mPointCloudDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
+                mPointCloudDrawer.onDraw(arCanvas);
             }
 
             //draw
             if (mSettings.drawPlanes.get()) {
-                mPlaneDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
+                mPlaneDrawer.onDraw(arCanvas);
             }
 
-            for (ARCoreObject arCoreObject : arCoreObjectList) {
-                arCoreObject.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
+            for (ARCoreObjectDrawer arCoreObjectDrawer : arCoreObjectDrawerList) {
+                arCoreObjectDrawer.onDraw(arCanvas);
             }
-            mlineDrawer.onDraw(arcoreFrame, cameraMatrix, projMatrix, lightIntensity);
+            mlineDrawer.onDraw(arCanvas);
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
@@ -157,8 +177,8 @@ public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView
                 // Check if any plane was hit, and if it was hit inside the plane polygon.
                 if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
 
-                    if (currentARCoreObject != null) {
-                        currentARCoreObject.addPlaneAttachment((PlaneHitResult) hit, mArcoreSession);
+                    if (currentARCoreObjectDrawer != null) {
+                        currentARCoreObjectDrawer.addPlaneAttachment((PlaneHitResult) hit, mArcoreSession);
                     }
 
                     // Hits are sorted by depth. Consider only closest hit on a plane.
@@ -182,10 +202,31 @@ public class ARCoreRenderer extends AbstractDrawManager implements GLSurfaceView
         return mlineDrawer.handleDrawingTouch(event);
     }
 
-    public void addObjectToDraw(ARCoreObject arCoreObject) {
-        arCoreObjectList.add(arCoreObject);
-        if (this.currentARCoreObject == null) {
-            currentARCoreObject = arCoreObject;
+    public void addObjectToDraw(ARCoreObjectDrawer arCoreObjectDrawer) {
+        arCoreObjectDrawerList.add(arCoreObjectDrawer);
+        if (this.currentARCoreObjectDrawer == null) {
+            currentARCoreObjectDrawer = arCoreObjectDrawer;
         }
     }
+
+    public void addSingleTapEvent(MotionEvent e) {
+        // Queue tap if there is space. Tap is lost if queue is full.
+        mQueuedSingleTaps.offer(e);
+    }
+
+    public void setListener(@Nullable Listener listener) {
+        this.mListener = listener;
+    }
+
+    public void onScale(float scaleFactor) {
+        if (currentARCoreObjectDrawer != null) {
+            currentARCoreObjectDrawer.setScaleFactor(scaleFactor);
+        }
+    }
+
+
+    public interface Listener {
+        void hideLoading();
+    }
+
 }

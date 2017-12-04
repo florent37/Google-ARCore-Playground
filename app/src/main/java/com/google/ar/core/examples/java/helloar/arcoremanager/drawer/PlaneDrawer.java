@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
+import com.google.ar.core.examples.java.helloar.core.ARCanvas;
 import com.google.ar.core.examples.java.helloar.core.rendering.PlaneRenderer;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class PlaneDrawer implements Drawer {
     }
 
     @Override
-    public void onDraw(Frame arcoreFrame, float[] cameraMatrix, float[] projMatrix, float lightIntensity) {
-        plane.drawPlanes(mArCoreSession.getAllPlanes(), arcoreFrame.getPose(), projMatrix);
+    public void onDraw(ARCanvas arCanvas) {
+        plane.drawPlanes(mArCoreSession.getAllPlanes(), arCanvas.getArcoreFrame().getPose(), arCanvas.getProjMatrix());
     }
 }

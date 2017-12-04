@@ -24,8 +24,8 @@ import android.view.View;
 
 import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
+import com.google.ar.core.examples.java.helloar.core.ARCanvas;
 import com.google.ar.core.examples.java.helloar.core.AppSettings;
-import com.google.ar.core.examples.java.helloar.arcoremanager.SizeManager;
 import com.google.ar.core.examples.java.helloar.core.rendering.BiquadFilter;
 import com.google.ar.core.examples.java.helloar.core.rendering.LineRenderer;
 import com.google.ar.core.examples.java.helloar.core.rendering.LineUtils;
@@ -48,7 +48,6 @@ public class LineDrawer implements Drawer {
     private static final String TAG = "LineDrawer";
 
     private final Session mArCoreSession;
-    private final SizeManager mScreenSizeManager;
 
     private final ArrayList<ArrayList<Vector3f>> mStrokes = new ArrayList<>();
     private final Context mContext;
@@ -81,8 +80,7 @@ public class LineDrawer implements Drawer {
     /**
      * Setup the app when main activity is created
      */
-    public LineDrawer(final Context context, final Session arCoreSession, final SizeManager screenSizeManager) {
-        this.mScreenSizeManager = screenSizeManager;
+    public LineDrawer(final Context context, final Session arCoreSession) {
         this.mArCoreSession = arCoreSession;
         this.mContext = context;
 
@@ -100,8 +98,8 @@ public class LineDrawer implements Drawer {
      *
      * @param touchPoint a 2D point in screen space and is projected into 3D world space
      */
-    private void addStroke(Vector2f touchPoint, final float[] cameramtx, final float[] projmtx) {
-        Vector3f newPoint = LineUtils.GetWorldCoords(touchPoint, mScreenSizeManager.getWidth(), mScreenSizeManager.getHeight(), projmtx, cameramtx, distance.get());
+    private void addStroke(Vector2f touchPoint, ARCanvas arCanvas) {
+        Vector3f newPoint = LineUtils.GetWorldCoords(touchPoint, arCanvas.getWidth(), arCanvas.getHeight(), arCanvas.getProjMatrix(), arCanvas.getCameraMatrix(), distance.get());
         addStroke(newPoint);
     }
 
@@ -111,8 +109,8 @@ public class LineDrawer implements Drawer {
      *
      * @param touchPoint a 2D point in screen space and is projected into 3D world space
      */
-    private void addPoint(Vector2f touchPoint, final float[] cameramtx, final float[] projmtx) {
-        Vector3f newPoint = LineUtils.GetWorldCoords(touchPoint, mScreenSizeManager.getWidth(), mScreenSizeManager.getHeight(), projmtx, cameramtx, distance.get());
+    private void addPoint(Vector2f touchPoint, ARCanvas arCanvas) {
+        Vector3f newPoint = LineUtils.GetWorldCoords(touchPoint, arCanvas.getWidth(), arCanvas.getHeight(), arCanvas.getProjMatrix(), arCanvas.getCameraMatrix(), distance.get());
         addPoint(newPoint);
     }
 
@@ -168,8 +166,11 @@ public class LineDrawer implements Drawer {
      * updates the ZeroMatrix and performs the matrix multiplication needed to re-center the drawing
      * updates the Line Renderer with the current strokes, color, distance scale, line width etc
      */
-    public void update(final Frame arCoreFrame, final float[] cameramtx, final float[] projmtx) {
+    public void update(final ARCanvas arCanvas) {
         try {
+
+            final Frame arCoreFrame = arCanvas.getArcoreFrame();
+            final float[] cameramtx = arCanvas.getCameraMatrix();
 
             // Update tracking states
             if (arCoreFrame.getTrackingState() == Frame.TrackingState.TRACKING && !bIsTracking.get()) {
@@ -195,14 +196,14 @@ public class LineDrawer implements Drawer {
             mLastFramePosition = position;
 
             // Multiply the zero matrix
-            Matrix.multiplyMM(cameramtx, 0, cameramtx, 0, mZeroMatrix, 0);
+            Matrix.multiplyMM(arCanvas.getCameraMatrix(), 0, arCanvas.getCameraMatrix(), 0, mZeroMatrix, 0);
 
             if (bNewStroke.get()) {
                 bNewStroke.set(false);
-                addStroke(lastTouch,  cameramtx, projmtx);
+                addStroke(lastTouch,  arCanvas);
                 mLineShaderRenderer.bNeedsUpdate.set(true);
             } else if (bTouchDown.get()) {
-                addPoint(lastTouch, cameramtx, projmtx);
+                addPoint(lastTouch, arCanvas);
                 mLineShaderRenderer.bNeedsUpdate.set(true);
             }
 
@@ -248,10 +249,11 @@ public class LineDrawer implements Drawer {
         );
     }
 
-    public void onDraw(final Frame arCoreFrame, final float[] cameramtx, final float[] projmtx, float lightIntensity){
-        update(arCoreFrame, cameramtx, projmtx);
-        if (arCoreFrame.getTrackingState() == Frame.TrackingState.TRACKING) {
-            mLineShaderRenderer.draw(cameramtx, projmtx, mScreenSizeManager.getWidth(), mScreenSizeManager.getHeight(), AppSettings.getNearClip(), AppSettings.getFarClip());
+    @Override
+    public void onDraw(final ARCanvas arCanvas){
+        update(arCanvas);
+        if (arCanvas.getArcoreFrame().getTrackingState() == Frame.TrackingState.TRACKING) {
+            mLineShaderRenderer.draw(arCanvas.getCameraMatrix(), arCanvas.getProjMatrix(), arCanvas.getWidth(), arCanvas.getHeight(), AppSettings.getNearClip(), AppSettings.getFarClip());
         }
     }
 
