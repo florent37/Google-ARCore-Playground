@@ -57,6 +57,8 @@ Then, an `Anchor` offer
 
 # Matrix, Reloaded
 
+## Projection
+
 As developer, the principal main objects we will need is `Pose`
 
 Because a Pose contains, for a plane, an object of even a point  :
@@ -70,3 +72,10 @@ OBJECT_3D.proj_matrix = OBJECT_3D.proj_matrix * OBJECT_3D.anchor.pose.proj_matri
 ```
 
 In java we will use the method `anchor.getPose().toMatrix(float[]) to obtain the anchor projection matrix
+
+## Camera
+
+And, do not fo forget to update your camera matrix,
+to ensure your objects to be drawn & visible at the perfect pose in space
+
+`arcoreFrame.getViewMatrix(float[], 0);`
