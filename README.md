@@ -23,9 +23,9 @@ Using https://github.com/tomthecarrot/arcore-for-all, arCore can run on unsuport
 
 # What the sample does
 
-[![gif](https://raw.githubusercontent.com/florent37/Google-ARCore-Playground/master/medias/plane.jpg)](https://github.com/florent37/Google-ARCore-Playground)
+[![planes](https://raw.githubusercontent.com/florent37/Google-ARCore-Playground/master/medias/plane.jpg)](https://github.com/florent37/Google-ARCore-Playground)
 
-[![gif](https://raw.githubusercontent.com/florent37/Google-ARCore-Playground/master/medias/with_lines.jpg)](https://github.com/florent37/Google-ARCore-Playground)
+[![lines](https://raw.githubusercontent.com/florent37/Google-ARCore-Playground/master/medias/with_lines.jpg)](https://github.com/florent37/Google-ARCore-Playground)
 
 # Understand ARCore
 
