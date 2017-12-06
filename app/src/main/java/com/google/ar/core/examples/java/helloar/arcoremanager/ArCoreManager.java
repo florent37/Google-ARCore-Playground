@@ -17,6 +17,7 @@ import com.google.ar.core.examples.java.helloar.RotationGestureDetector;
 import com.google.ar.core.examples.java.helloar.arcoremanager.object.ARCoreObjectDrawer;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
