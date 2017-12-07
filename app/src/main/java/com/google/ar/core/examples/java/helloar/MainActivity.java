@@ -64,6 +64,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+    }
+
+    public void init(){
+        if(arCoreManager != null){
+            return;
+        }
         arCoreManager = new ArCoreManager(this, new ArCoreManager.Listener() {
             @Override
             public void onArCoreUnsuported() {
@@ -123,6 +129,29 @@ public class MainActivity extends AppCompatActivity {
         );
 
         bottomNavigationView.setSelectedItemId(R.id.onTap_addAndroidObject);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        if (!PermissionHelper.hasCameraPermission(this)) {
+            Toast.makeText(this,
+                    "Camera permission is needed to run this application", Toast.LENGTH_LONG).show();
+            finish();
+        }
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        // ARCore requires camera permissions to operate. If we did not yet obtain runtime
+        // permission on Android M and above, now is a good time to ask the user for it.
+        if (PermissionHelper.hasCameraPermission(this)) {
+            // Note that order matters - see the note in onPause(), the reverse applies here.
+            init();
+        } else {
+            PermissionHelper.requestCameraPermission(this);
+        }
     }
 
     private void openSettings() {

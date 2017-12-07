@@ -138,11 +138,11 @@ public class ArCoreManager {
         // permission on Android M and above, now is a good time to ask the user for it.
         RxLifecycle.with(mActivity)
                 .onResume()
-                .flatMap($ -> new RxPermissions(mActivity).request(Manifest.permission.CAMERA))
-                .flatMap(success -> {
-                    if (!success) return Observable.error(new Throwable());
-                    else return Observable.just(success);
-                })
+                //.flatMap($ -> new RxPermissions(mActivity).request(Manifest.permission.CAMERA))
+                //.flatMap(success -> {
+                //    if (!success) return Observable.error(new Throwable());
+                //    else return Observable.just(success);
+                //})
                 .subscribe(event -> {
                     mListener.showLoadingMessage();
                     // Note that order matters - see the note in onPause(), the reverse applies here.
@@ -150,6 +150,7 @@ public class ArCoreManager {
 
                     mSurfaceView.onResume();
                 }, throwable -> {
+                    throwable.printStackTrace();
                     mListener.onPermissionNotAllowed();
                 });
 
