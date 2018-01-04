@@ -1,5 +1,11 @@
 # Google ARCore Playground
 
+
+<a href="https://goo.gl/WXW8Dc">
+  <img alt="Android app on Google Play" src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png" />
+</a>
+
+
 # Prequel
 
 https://developers.google.com/ar/develop/
@@ -81,3 +87,9 @@ And, do not fo forget to update your camera matrix,
 to ensure your objects to be drawn & visible at the perfect pose in space
 
 `arcoreFrame.getViewMatrix(float[], 0);`
+
+
+
+<a href="https://goo.gl/WXW8Dc">
+  <img alt="Android app on Google Play" src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png" />
+</a>
